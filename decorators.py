@@ -1,22 +1,29 @@
-import time
 import functools
 
+user = {
+    'name': 'Azalia',
+    'password': 'admin'
+}
 
-def timer(func):
-    @functools.wraps(func)
-    def decorator(*args):
-        time1 = time.time()
-        result = func(*args)
-        time2 = time.time()
-        print(time2 - time1)
-        return result
+
+def check_password(password):
+    def decorator (func) :
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if password == user['password']:
+                return func(*args, **kwargs)
+            return 'В доступе отказано'
+        return wrapper
     return decorator
 
 
-@timer
-def function():
-    time.sleep(3)
-    return None
+@check_password('admin')
+def get_secure_information(text):
+    if text == 'Hello':
+        return 'Hello my dear friend!'
+    if text == 'Qest':
+        return 'How are you?'
+    return "Choose between 'Hello' and 'Quest'"
 
 
-print(function())
+print(get_secure_information('Hello'))
