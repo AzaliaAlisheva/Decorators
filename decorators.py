@@ -6,24 +6,47 @@ user = {
 }
 
 
-def check_password(password):
-    def decorator (func) :
+def decorator_maker(password):
+    def check_password(func):
+        if password != user['password']:
+            return lambda x: "В доступе отказано"
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if password == user['password']:
-                return func(*args, **kwargs)
-            return 'В доступе отказано'
+            return func(*args, **kwargs)
         return wrapper
-    return decorator
+    return check_password
 
 
-@check_password('admin')
-def get_secure_information(text):
-    if text == 'Hello':
-        return 'Hello my dear friend!'
-    if text == 'Qest':
-        return 'How are you?'
-    return "Choose between 'Hello' and 'Quest'"
+ans = {}
 
 
-print(get_secure_information('Hello'))
+# def cached(func):
+#     def wrapper(*args, **kwargs):
+#         got = ans.get(tuple(*args, **kwargs))
+#         if got is None:
+#             ret = func(*args, **kwargs)
+#             ans[tuple(*args, **kwargs)] = ret
+#             return ret
+#         return got
+#     return wrapper
+
+
+def cached(func):
+    def wrapper(i):
+        got = ans.get(i)
+        if got is None:
+            ret = func(i)
+            ans[i] = ret
+            return ret
+        return got
+    return wrapper
+
+
+@cached
+@decorator_maker('admin')
+def F(i):
+    if i < 3:
+        return 1
+    return F(i-1)+F(i-2)
+
+print(F(12))
